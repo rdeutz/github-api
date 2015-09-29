@@ -46,7 +46,7 @@ class Repositories extends AbstractPackage
 	 * @return object
 	 * @since   1.0
 	 */
-	public function getListOwn($type = 'all', $sort = 'full_name', $direction = '', $page = 0, $limit = 10)
+	public function getListOwn($type = 'all', $sort = 'full_name', $direction = '', $page = 0, $limit = 0)
 	{
 		if (false == in_array($type, array('all', 'owner', 'public', 'private', 'member')))
 		{
@@ -93,7 +93,7 @@ class Repositories extends AbstractPackage
 	 * @since   1.0
 	 * @throws  \RuntimeException
 	 */
-	public function getListUser($user, $type = 'all', $sort = 'full_name', $direction = '', $page = 0, $limit = 10)
+	public function getListUser($user, $type = 'all', $sort = 'full_name', $direction = '', $page = 0, $limit = 0)
 	{
 		if (false == in_array($type, array('all', 'owner', 'member')))
 		{
@@ -138,7 +138,7 @@ class Repositories extends AbstractPackage
 	 * @since   1.0
 	 * @throws  \RuntimeException
 	 */
-	public function getListOrg($org, $type = 'all', $page = 0, $limit = 10)
+	public function getListOrg($org, $type = 'all', $page = 0, $limit = 0)
 	{
 		if (false == in_array($type, array('all', 'public', 'private', 'forks', 'sources', 'member')))
 		{
@@ -167,7 +167,7 @@ class Repositories extends AbstractPackage
 	 * @since   1.0
 	 * @throws  \RuntimeException
 	 */
-	public function getList($id = 0, $page = 0, $limit = 10)
+	public function getList($id = 0, $page = 0, $limit = 0)
 	{
 		// Build the request path.
 		$path = '/repositories';
