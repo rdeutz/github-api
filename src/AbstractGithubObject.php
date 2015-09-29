@@ -38,6 +38,18 @@ abstract class AbstractGithubObject
 	protected $package = '';
 
 	/**
+	 * @var    array  Array of the returned headers
+	 * @since  1.4
+	 */
+	protected $headers = array();
+
+	/**
+	 * @var    Registry  Pagination
+	 * @since  1.4
+	 */
+	protected $pagination;
+
+	/**
 	 * Constructor.
 	 *
 	 * @param   Registry  $options  GitHub options object.
@@ -52,6 +64,10 @@ abstract class AbstractGithubObject
 
 		$this->package = get_class($this);
 		$this->package = substr($this->package, strrpos($this->package, '\\') + 1);
+
+		$this->pagination = new Registry;
+
+		$this->pagination->set('page.count', 1);
 	}
 
 	/**
@@ -107,6 +123,24 @@ abstract class AbstractGithubObject
 	}
 
 	/**
+	 * Method to get a response object, it will set headers if available
+	 *
+	 * @param   string   $path   URL to inflect
+	 *
+	 * @return  string   The request URL.
+	 *
+	 * @since   1.4
+	 */
+	public function getResponse($path, $page = 0, $limit = 0)
+	{
+		$response = $this->client->get($this->fetchUrl($path, $page, $limit));
+
+		$this->setHeaders($response);
+
+		return $response;
+	}
+
+	/**
 	 * Process the response and decode it.
 	 *
 	 * @param   Response  $response      The response.
@@ -129,5 +163,83 @@ abstract class AbstractGithubObject
 		}
 
 		return json_decode($response->body);
+	}
+
+	/**
+	 * @TODO this should be moved into the separated class to follow the SRP
+	 *
+	 * @param $response
+	 *
+	 */
+	private function setHeaders($response)
+	{
+		if (isset($response->headers))
+		{
+			$this->headers = $response->headers;
+
+			if (isset($this->headers['Link']))
+			{
+				$this->setPagination($this->headers['Link']);
+			}
+		}
+	}
+
+	/**
+	 * Set a pagination object
+	 *
+	 * @TODO this should be moved into the separated class to follow the SRP
+	 *
+	 * @param $link
+	 *
+	 * @return bool
+	 */
+	private function setPagination($link)
+	{
+		$elements = explode(',', $link);
+
+		foreach($elements as $element)
+		{
+			$startPos = strpos($element, '<') + 1;
+			$url = substr($element, $startPos, strpos($element, '>') - $startPos);
+			$startPos = strpos($element, 'rel="') + 5;
+			$type = substr($element, $startPos, strpos($element, '"', $startPos) - $startPos);
+
+			parse_str($url, $params);
+			$page = $params['page'];
+
+			switch ($type)
+			{
+				case 'next':
+					$this->pagination->set('page.next', $page);
+					$this->pagination->set('link.next', $url);
+					break;
+				case 'last':
+					$this->pagination->set('page.count', $page);
+					$this->pagination->set('link.last', $url);
+					break;
+				case 'first':
+					$this->pagination->set('page.first', $page);
+					$this->pagination->set('link.first', $url);
+					break;
+				case 'prev':
+					$this->pagination->set('page.prev', $page);
+					$this->pagination->set('link.prev', $url);
+					break;
+			}
+		}
+
+		return true;
+	}
+
+	/**
+	 * get the pagination object
+	 *
+	 * @TODO this should be moved into the separated class to follow the SRP
+	 *
+	 * @return Registry
+	 */
+	public function getPagination()
+	{
+		return $this->pagination;
 	}
 }

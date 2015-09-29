@@ -37,16 +37,16 @@ class Repositories extends AbstractPackage
 	 *
 	 * List repositories for the authenticated user.
 	 *
-	 * @param   string  $type       Sort type. all, owner, public, private, member. Default: all.
-	 * @param   string  $sort       Sort field. created, updated, pushed, full_name, default: full_name.
-	 * @param   string  $direction  Sort direction. asc or desc, default: when using full_name: asc, otherwise desc.
+	 * @param   string $type Sort type. all, owner, public, private, member. Default: all.
+	 * @param   string $sort Sort field. created, updated, pushed, full_name, default: full_name.
+	 * @param   string $direction Sort direction. asc or desc, default: when using full_name: asc, otherwise desc.
+	 * @param   int    $page requested page
+	 * @param   int    $limit number of results per page
 	 *
-	 * @return  object
-	 *
+	 * @return object
 	 * @since   1.0
-	 * @throws  \RuntimeException
 	 */
-	public function getListOwn($type = 'all', $sort = 'full_name', $direction = '')
+	public function getListOwn($type = 'all', $sort = 'full_name', $direction = '', $page = 0, $limit = 10)
 	{
 		if (false == in_array($type, array('all', 'owner', 'public', 'private', 'member')))
 		{
@@ -72,10 +72,10 @@ class Repositories extends AbstractPackage
 			. '&sort=' . $sort
 			. '&direction=' . $direction;
 
+		$response = $this->getResponse($path, $page, $limit);
+
 		// Send the request.
-		return $this->processResponse(
-			$this->client->get($this->fetchUrl($path))
-		);
+		return $this->processResponse($response);
 	}
 
 	/**
@@ -93,7 +93,7 @@ class Repositories extends AbstractPackage
 	 * @since   1.0
 	 * @throws  \RuntimeException
 	 */
-	public function getListUser($user, $type = 'all', $sort = 'full_name', $direction = '')
+	public function getListUser($user, $type = 'all', $sort = 'full_name', $direction = '', $page = 0, $limit = 10)
 	{
 		if (false == in_array($type, array('all', 'owner', 'member')))
 		{
@@ -119,10 +119,10 @@ class Repositories extends AbstractPackage
 			. '&sort=' . $sort
 			. '&direction=' . $direction;
 
+		$response = $this->getResponse($path, $page, $limit);
+
 		// Send the request.
-		return $this->processResponse(
-			$this->client->get($this->fetchUrl($path))
-		);
+		return $this->processResponse($response);
 	}
 
 	/**
@@ -138,7 +138,7 @@ class Repositories extends AbstractPackage
 	 * @since   1.0
 	 * @throws  \RuntimeException
 	 */
-	public function getListOrg($org, $type = 'all')
+	public function getListOrg($org, $type = 'all', $page = 0, $limit = 10)
 	{
 		if (false == in_array($type, array('all', 'public', 'private', 'forks', 'sources', 'member')))
 		{
@@ -149,10 +149,10 @@ class Repositories extends AbstractPackage
 		$path = '/orgs/' . $org . '/repos'
 			. '?type=' . $type;
 
+		$response = $this->getResponse($path, $page, $limit);
+
 		// Send the request.
-		return $this->processResponse(
-			$this->client->get($this->fetchUrl($path))
-		);
+		return $this->processResponse($response);
 	}
 
 	/**
@@ -167,16 +167,16 @@ class Repositories extends AbstractPackage
 	 * @since   1.0
 	 * @throws  \RuntimeException
 	 */
-	public function getList($id = 0)
+	public function getList($id = 0, $page = 0, $limit = 10)
 	{
 		// Build the request path.
 		$path = '/repositories';
 		$path .= ($id) ? '?since=' . (int) $id : '';
 
+		$response = $this->getResponse($path, $page, $limit);
+
 		// Send the request.
-		return $this->processResponse(
-			$this->client->get($this->fetchUrl($path))
-		);
+		return $this->processResponse($response);
 	}
 
 	/**
@@ -248,10 +248,10 @@ class Repositories extends AbstractPackage
 		// Build the request path.
 		$path = '/repos/' . $owner . '/' . $repo;
 
+		$response = $this->getResponse($path);
+
 		// Send the request.
-		return $this->processResponse(
-			$this->client->get($this->fetchUrl($path))
-		);
+		return $this->processResponse($response);
 	}
 
 	/**
@@ -311,10 +311,10 @@ class Repositories extends AbstractPackage
 
 		$path .= ($anon) ? '?anon=true' : '';
 
+		$response = $this->getResponse($path);
+
 		// Send the request.
-		return $this->processResponse(
-			$this->client->get($this->fetchUrl($path))
-		);
+		return $this->processResponse($response);
 	}
 
 	/**
@@ -333,10 +333,10 @@ class Repositories extends AbstractPackage
 		// Build the request path.
 		$path = '/repos/' . $owner . '/' . $repo . '/languages';
 
+		$response = $this->getResponse($path);
+
 		// Send the request.
-		return $this->processResponse(
-			$this->client->get($this->fetchUrl($path))
-		);
+		return $this->processResponse($response);
 	}
 
 	/**
@@ -352,10 +352,10 @@ class Repositories extends AbstractPackage
 		// Build the request path.
 		$path = '/repos/' . $owner . '/' . $repo . '/teams';
 
+		$response = $this->getResponse($path);
+
 		// Send the request.
-		return $this->processResponse(
-			$this->client->get($this->fetchUrl($path))
-		);
+		return $this->processResponse($response);
 	}
 
 	/**
@@ -371,10 +371,10 @@ class Repositories extends AbstractPackage
 		// Build the request path.
 		$path = '/repos/' . $owner . '/' . $repo . '/tags';
 
+		$response = $this->getResponse($path);
+
 		// Send the request.
-		return $this->processResponse(
-			$this->client->get($this->fetchUrl($path))
-		);
+		return $this->processResponse($response);
 	}
 
 	/**
@@ -390,10 +390,10 @@ class Repositories extends AbstractPackage
 		// Build the request path.
 		$path = '/repos/' . $owner . '/' . $repo . '/branches';
 
+		$response = $this->getResponse($path);
+
 		// Send the request.
-		return $this->processResponse(
-			$this->client->get($this->fetchUrl($path))
-		);
+		return $this->processResponse($response);
 	}
 
 	/**
@@ -410,10 +410,10 @@ class Repositories extends AbstractPackage
 		// Build the request path.
 		$path = '/repos/' . $owner . '/' . $repo . '/branches/' . $branch;
 
+		$response = $this->getResponse($path);
+
 		// Send the request.
-		return $this->processResponse(
-			$this->client->get($this->fetchUrl($path))
-		);
+		return $this->processResponse($response);
 	}
 
 	/**
